@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PresentsValidator<C: Collection>: Validator {
+public struct NotEmptyValidator<C: Collection>: Validator {
     public var errorMessage: String
     
     public init(errorMessage: String) {

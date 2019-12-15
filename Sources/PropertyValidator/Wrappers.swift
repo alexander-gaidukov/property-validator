@@ -12,49 +12,55 @@ import Foundation
 
 @propertyWrapper
 public final class Validated<Value> {
-    #if swift(>=13.0)
-    private var subject: Publishers.HandleEvents<PassthroughSubject<[ValidationError], Never>>!
+    
+    private var _subject: Any!
+    
+    @available(iOS 13.0, *)
+    private var subject: Publishers.HandleEvents<PassthroughSubject<[ValidationError], Never>> {
+        return _subject as! Publishers.HandleEvents<PassthroughSubject<[ValidationError], Never>>
+    }
+    
     private var subscribed: Bool = false
-    #endif
     private var validators: [AnyValidator<Value>]
     
     public var wrappedValue: Value? {
         didSet {
-            #if swift(>=13.0)
-            if subscribed {
-                subject.upstream.send(validate())
+            if #available(iOS 13.0, *) {
+                if subscribed {
+                    subject.upstream.send(validate())
+                }
             }
-            #endif
         }
     }
     
     public init(wrappedValue value: Value?, _ validators: [AnyValidator<Value>]) {
         wrappedValue = value
         self.validators = validators
-        #if swift(>=13.0)
-        subject = PassthroughSubject<[ValidationError], Never>()
-            .handleEvents(receiveSubscription: {[weak self] _ in
-            self?.subscribed = true
-        })
-        #endif
+        if #available(iOS 13.0, *) {
+            _subject = PassthroughSubject<[ValidationError], Never>()
+                .handleEvents(receiveSubscription: {[weak self] _ in
+                self?.subscribed = true
+            })
+        }
     }
     
-    #if swift(>=13.0)
-    var projectedValue: AnyPublisher<[ValidationError], Never> {
+    public var projectedValue: Validated<Value> {
+        self
+    }
+    
+    @available(iOS 13.0, *)
+    public var publisher: AnyPublisher<[ValidationError], Never> {
         subject.eraseToAnyPublisher()
     }
-    #endif
     
-    func validate() -> [ValidationError] {
+    public func validate() -> [ValidationError] {
         var errors: [ValidationError] = []
         validators.forEach {
             do {
                 try $0.validate(value: wrappedValue)
             }
             catch {
-                if let validationError = error as? ValidationError {
-                    errors.append(validationError)
-                }
+                errors.append(error as! ValidationError)
             }
         }
         return errors

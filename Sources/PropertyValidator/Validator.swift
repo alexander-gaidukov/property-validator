@@ -14,6 +14,12 @@ public protocol Validator {
 }
 
 public extension Validator {
+    func eraseToAnyValidator() -> AnyValidator<ValueType> {
+        AnyValidator(validator: self)
+    }
+}
+
+extension Validator {
     func validate(value: ValueType?) throws {
         if !isValid(value: value) {
             throw ValidationError(message: errorMessage)
@@ -21,13 +27,7 @@ public extension Validator {
     }
 }
 
-public extension Validator {
-    func eraseToAnyValidator() -> AnyValidator<ValueType> {
-        AnyValidator(validator: self)
-    }
-}
-
-class ValidatorBox<T>: Validator {
+private class ValidatorBox<T>: Validator {
     var errorMessage: String {
         fatalError()
     }
@@ -37,9 +37,12 @@ class ValidatorBox<T>: Validator {
     }
 }
 
-class ValidatorBoxHelper<T, V:Validator>: ValidatorBox<T> where V.ValueType == T {
+private class ValidatorBoxHelper<T, V:Validator>: ValidatorBox<T> where V.ValueType == T {
+    private let validator: V
     
-    private var validator: V
+    init(validator: V) {
+        self.validator = validator
+    }
     
     override var errorMessage: String {
         validator.errorMessage
@@ -48,21 +51,17 @@ class ValidatorBoxHelper<T, V:Validator>: ValidatorBox<T> where V.ValueType == T
     override func isValid(value: T?) -> Bool {
         validator.isValid(value: value)
     }
-    
-    init(validator: V) {
-        self.validator = validator
-    }
 }
 
 public struct AnyValidator<T>: Validator {
     private let validator: ValidatorBox<T>
     
-    public var errorMessage: String {
-        validator.errorMessage
+    public init<V: Validator>(validator: V) where V.ValueType == T {
+        self.validator = ValidatorBoxHelper(validator: validator)
     }
     
-    init<V: Validator>(validator: V) where V.ValueType == T {
-        self.validator = ValidatorBoxHelper(validator: validator)
+    public var errorMessage: String {
+        validator.errorMessage
     }
     
     public func isValid(value: T?) -> Bool {

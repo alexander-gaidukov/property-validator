@@ -17,7 +17,7 @@ public struct LengthValidator<R: RangeExpression, C: Collection>: Validator wher
     }
     
     public func isValid(value: C?) -> Bool {
-        guard let count = value?.count, count > 0 else { return true } // Presents or NotNil validators should cover this case
+        guard let count = value?.count, count > 0 else { return true } // NotEmpty or NotNil validators should cover this case
         if range.contains(value?.count ?? 0) {
             return true
         }
