@@ -14,7 +14,7 @@ public protocol Validator {
 }
 
 public extension Validator {
-    func eraseToAnyValidator() -> AnyValidator<ValueType> {
+    var validator: AnyValidator<ValueType> {
         AnyValidator(validator: self)
     }
 }

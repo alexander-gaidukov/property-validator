@@ -16,16 +16,16 @@ Property Validator is a Swift Package that allows you to add all needed validati
 
 ```swift
 @Validated([
-    NotEmptyValidator(errorMessage: "Email field can't be empty").eraseToAnyValidator(),
-    EmailValidator(errorMessage: "The email format is wrong").eraseToAnyValidator()
+    NotEmptyValidator(errorMessage: "Email field can't be empty").validator,
+    EmailValidator(errorMessage: "The email format is wrong").validator
 ])
 var email: String? = nil
 ```
 
 ```swift
 @Validated([
-    NotEmptyValidator(errorMessage: "Password field can't be empty").eraseToAnyValidator(),
-    LengthValidator(range: 5..., errorMessage: "The password is too short").eraseToAnyValidator()
+    NotEmptyValidator(errorMessage: "Password field can't be empty").validator,
+    LengthValidator(range: 5..., errorMessage: "The password is too short").validator
 ])
 var password: String? = nil
 ```
