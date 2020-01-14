@@ -11,7 +11,7 @@ import Combine
 import Foundation
 
 @propertyWrapper
-public final class Validated<Value> {
+open class Validated<Value> {
     
     private var _subject: Any!
     
@@ -23,7 +23,7 @@ public final class Validated<Value> {
     private var subscribed: Bool = false
     private var validators: [AnyValidator<Value>]
     
-    public var wrappedValue: Value? {
+    open var wrappedValue: Value? {
         didSet {
             if #available(iOS 13.0, *) {
                 if subscribed {
@@ -44,7 +44,7 @@ public final class Validated<Value> {
         }
     }
     
-    public var projectedValue: Validated<Value> {
+    open var projectedValue: Validated<Value> {
         self
     }
     
