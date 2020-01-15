@@ -27,7 +27,7 @@ open class Validated<Value> {
         didSet {
             if #available(iOS 13.0, *) {
                 if subscribed {
-                    subject.upstream.send(validate())
+                    subject.upstream.send(errors)
                 }
             }
         }
@@ -53,7 +53,7 @@ open class Validated<Value> {
         subject.eraseToAnyPublisher()
     }
     
-    public func validate() -> [ValidationError] {
+    public var errors: [ValidationError] {
         var errors: [ValidationError] = []
         validators.forEach {
             do {
