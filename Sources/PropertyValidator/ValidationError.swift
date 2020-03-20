@@ -8,7 +8,11 @@
 import Foundation
 
 public struct ValidationError: LocalizedError {
-    var message: String
+    private var message: String
+    
+    public init(message: String) {
+        self.message = message
+    }
     public var errorDescription: String? {
         message
     }

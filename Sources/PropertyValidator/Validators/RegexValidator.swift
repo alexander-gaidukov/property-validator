@@ -14,9 +14,10 @@ public struct RegexValidator: Validator {
         self.regex = regex
         self.errorMessage = errorMessage
     }
-    public func isValid(value: String?) -> Bool {
-        guard let v = value, !v.isEmpty else { return true } // NotEmpty or NotNil validator should handle this
+    public func validate(value: String?) throws {
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
-        return predicate.evaluate(with: v)
+        if !predicate.evaluate(with: value) {
+            throw ValidationError(message: errorMessage)
+        }
     }
 }

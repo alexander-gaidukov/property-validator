@@ -14,7 +14,9 @@ public struct NotEmptyValidator<C: Collection>: Validator {
         self.errorMessage = errorMessage
     }
     
-    public func isValid(value: C?) -> Bool {
-        value?.isEmpty == false
+    public func validate(value: C?) throws {
+        if value?.isEmpty != false {
+            throw ValidationError(message: errorMessage)
+        }
     }
 }

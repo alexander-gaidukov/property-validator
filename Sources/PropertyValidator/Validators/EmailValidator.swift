@@ -12,10 +12,11 @@ public struct EmailValidator: Validator {
     public init(errorMessage: String) {
         self.errorMessage = errorMessage
     }
-    public func isValid(value: String?) -> Bool {
-        guard let email = value, !email.isEmpty else { return true } // NotEmpty or NotNil validator should handle this
+    public func validate(value: String?) throws {
         let regex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-za-z]{2,64}"
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
-        return predicate.evaluate(with: email)
+        if !predicate.evaluate(with: value) {
+            throw ValidationError(message: errorMessage)
+        }
     }
 }

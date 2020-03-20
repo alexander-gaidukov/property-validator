@@ -14,7 +14,9 @@ public struct NotNilValidator<Value>: Validator {
         self.errorMessage = errorMessage
     }
     
-    public func isValid(value: Value?) -> Bool {
-        value != nil
+    public func validate(value: Value?) throws {
+        if value == nil {
+            throw ValidationError(message: errorMessage)
+        }
     }
 }

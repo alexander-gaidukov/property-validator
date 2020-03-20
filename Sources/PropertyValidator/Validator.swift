@@ -9,8 +9,7 @@ import Foundation
 
 public protocol Validator {
     associatedtype ValueType
-    var errorMessage: String { get }
-    func isValid(value: ValueType?) -> Bool
+    func validate(value: ValueType?) throws
 }
 
 public extension Validator {
@@ -19,11 +18,13 @@ public extension Validator {
     }
 }
 
-extension Validator {
-    func validate(value: ValueType?) throws {
-        if !isValid(value: value) {
-            throw ValidationError(message: errorMessage)
-        }
+public extension Validator {
+    func next<V: Validator>(_ validator: V) -> SequenceValidator<V.ValueType> where V.ValueType == Self.ValueType {
+        next([validator.validator])
+    }
+    
+    func next(_ validators: [AnyValidator<ValueType>]) -> SequenceValidator<ValueType> {
+        SequenceValidator(validators: [[self.validator], validators])
     }
 }
 
@@ -32,7 +33,7 @@ private class ValidatorBox<T>: Validator {
         fatalError()
     }
     
-    func isValid(value: T?) -> Bool {
+    func validate(value: T?) throws {
         fatalError()
     }
 }
@@ -48,8 +49,8 @@ private class ValidatorBoxHelper<T, V:Validator>: ValidatorBox<T> where V.ValueT
         validator.errorMessage
     }
     
-    override func isValid(value: T?) -> Bool {
-        validator.isValid(value: value)
+    override func validate(value: T?) throws {
+        try validator.validate(value: value)
     }
 }
 
@@ -64,7 +65,7 @@ public struct AnyValidator<T>: Validator {
         validator.errorMessage
     }
     
-    public func isValid(value: T?) -> Bool {
-        validator.isValid(value: value)
+    public func validate(value: T?) throws {
+        try validator.validate(value: value)
     }
 }

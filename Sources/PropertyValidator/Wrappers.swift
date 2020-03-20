@@ -16,8 +16,8 @@ open class Validated<Value> {
     private var _subject: Any!
     
     @available(iOS 13.0, *)
-    private var subject: Publishers.HandleEvents<PassthroughSubject<[ValidationError], Never>> {
-        return _subject as! Publishers.HandleEvents<PassthroughSubject<[ValidationError], Never>>
+    private var subject: Publishers.HandleEvents<PassthroughSubject<[Error], Never>> {
+        return _subject as! Publishers.HandleEvents<PassthroughSubject<[Error], Never>>
     }
     
     private var subscribed: Bool = false
@@ -37,7 +37,7 @@ open class Validated<Value> {
         wrappedValue = value
         self.validators = validators
         if #available(iOS 13.0, *) {
-            _subject = PassthroughSubject<[ValidationError], Never>()
+            _subject = PassthroughSubject<[Error], Never>()
                 .handleEvents(receiveSubscription: {[weak self] _ in
                 self?.subscribed = true
             })
@@ -49,18 +49,22 @@ open class Validated<Value> {
     }
     
     @available(iOS 13.0, *)
-    public var publisher: AnyPublisher<[ValidationError], Never> {
+    public var publisher: AnyPublisher<[Error], Never> {
         subject.eraseToAnyPublisher()
     }
     
-    public var errors: [ValidationError] {
-        var errors: [ValidationError] = []
+    public var errors: [Error] {
+        var errors: [Error] = []
         validators.forEach {
             do {
                 try $0.validate(value: wrappedValue)
             }
             catch {
-                errors.append(error as! ValidationError)
+                if let multipleError = error as? MultipleError {
+                    errors.append(contentsOf: multipleError.errors)
+                } else {
+                    errors.append(error)
+                }
             }
         }
         return errors

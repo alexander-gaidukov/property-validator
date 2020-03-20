@@ -16,12 +16,9 @@ public struct LengthValidator<R: RangeExpression, C: Collection>: Validator wher
         self.errorMessage = errorMessage
     }
     
-    public func isValid(value: C?) -> Bool {
-        guard let count = value?.count, count > 0 else { return true } // NotEmpty or NotNil validators should cover this case
-        if range.contains(value?.count ?? 0) {
-            return true
+    public func validate(value: C?) throws {
+        if !range.contains(value?.count ?? 0) {
+            throw ValidationError(message: errorMessage)
         }
-        
-        return false
     }
 }
