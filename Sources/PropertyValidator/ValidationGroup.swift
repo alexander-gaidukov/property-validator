@@ -15,12 +15,15 @@ public protocol ValidationGroup {
 extension ValidationGroup {
     var values: [Value?] {
         let mirror = Mirror(reflecting: self)
-        var result = [Value?]()
-        for child in mirror.children {
-            if let value = child.value as? Value? {
-                result.append(value)
+        return mirror.children.map {
+            if let wrapper = $0.value as? Validated<Value> {
+                return wrapper.wrappedValue
             }
+            if let value = $0.value as? Value {
+                return value
+            }
+            return nil
         }
-        return result
     }
+
 }
